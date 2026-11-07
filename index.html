@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>THE PUBLISHER – Login</title>
+<style>
+body{margin:0;background:#0b0b0c;color:#f4f1ea;font:16px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;padding:24px}
+h1{font:800 26px/1 Impact,Haettenschweiler,sans-serif;letter-spacing:2px;margin:0 0 4px}h1 span{color:#ff3b30}
+.card{background:#141416;border:1px solid #2a2927;border-radius:14px;padding:16px;margin:18px 0;max-width:640px}
+a.btn,button{display:inline-block;background:#ff3b30;color:#fff;border:0;border-radius:10px;padding:12px 18px;font-weight:700;text-decoration:none;font-size:16px}
+textarea{width:100%;min-height:90px;background:#000;color:#ffb52e;border:1px solid #3a3834;border-radius:10px;padding:10px;font:13px monospace}
+small{color:#a8a49a}.bad{color:#ff6b6b}
+</style>
+</head>
+<body>
+<h1>THE <span>PUBLISHER</span></h1>
+<small>by JJ DA PLUG – Login-Weiterleitung zu deiner MPC</small>
+<div class="card" id="box">Einen Moment...</div>
+<script>
+// The platform sent the browser here (https, as every platform demands) with ?code=...&state=....
+// state carries the MPC's own address (made by the MPC's page). Forward everything there. Nothing is stored or sent elsewhere.
+(function () {
+  var box = document.getElementById("box");
+  var q = new URLSearchParams(location.search);
+  var state = q.get("state") || "", base = "";
+  try {
+    var s = state.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    base = JSON.parse(atob(s)).b || "";
+  } catch (e) {}
+  var ok = /^http:\/\/(10|127|169\.254|172\.(1[6-9]|2\d|3[01])|192\.168)\.[0-9.]+(:\d+)?$/.test(base);
+  if (q.get("error")) {
+    box.innerHTML = '<p class="bad">Login abgebrochen: ' + (q.get("error_description") || q.get("error")).replace(/</g, "&lt;") + '</p>';
+    return;
+  }
+  if (!q.get("code") || !ok) {
+    box.innerHTML = "<p>Diese Seite leitet Logins von THE PUBLISHER an deine MPC weiter. Starte den Login auf der Handy-Seite der MPC.</p>";
+    return;
+  }
+  var target = base + "/cb" + location.search;
+  box.innerHTML = '<p>Weiter zu deiner MPC...</p><p><a class="btn" href="' + target.replace(/"/g, "%22") + '">Zur MPC</a></p>' +
+    '<p><small>Klappt es nicht? Handy im gleichen WLAN wie die MPC? Sonst diese Adresse kopieren und auf der MPC-Seite unter Konten einfügen:</small></p>' +
+    '<textarea readonly onclick="this.select()">' + location.href.replace(/</g, "&lt;") + '</textarea>';
+  setTimeout(function () { location.replace(target); }, 400);
+})();
+</script>
+</body>
+</html>
